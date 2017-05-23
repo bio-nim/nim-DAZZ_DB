@@ -11,9 +11,11 @@ requires "nim >= 0.17.0"
 
 srcDir = "./src"
 
-before install:
-    echo "HELLO"
+if not dirExists("repos/DAZZ_DB"):
+    let msg = "git submodule update --init"
+    echo msg
+    exec(msg)
 
 task test, "Test dazz_db wrapper":
     withDir("tests"):
-        exec("nim c -r open")
+        exec("make")
