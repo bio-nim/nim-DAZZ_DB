@@ -1,3 +1,5 @@
+{.compile: "DB.c".}
+{.passC: "-I../../repos/DAZZ_DB".}
 ## ******************************************************************************************
 ## 
 ##   Compressed data base module.  Auxiliary routines to open and manipulate a data base for
@@ -12,23 +14,7 @@
 ## 
 ## ******************************************************************************************
 
-import
-  QV
-
-const
-  HIDE_FILES* = true ##   Auxiliary DB files start with a . so they are "hidden"
-                  ##     Undefine if you don't want this
-
-##   For interactive applications where it is inappropriate to simply exit with an error
-##     message to standard error, define the constant INTERACTIVE.  If set, then error
-##     messages are put in the global variable Ebuffer and the caller of a DB routine
-##     can decide how to deal with the error.
-## 
-##   DB, QV, or alignment routines that can encounter errors function as before in
-##     non-INTERACTIVE mode by exiting after printing an error message to stderr.  In
-##     INTERACTIVE mode the routines place a message at EPLACE and return an error
-##     value.  For such routines that were previously void, they are now int, and
-##     return 1 if an error occured, 0 otherwise.
+from QV import QVcoding
 
 ## ******************************************************************************************
 ## 
@@ -358,3 +344,6 @@ proc Read_All_Sequences*(db: ptr HITS_DB; ascii: cint): cint {.cdecl,
 proc List_DB_Files*(path: cstring;
                    actor: proc (path: cstring; extension: cstring) {.cdecl.}): cint {.
     cdecl, importc: "List_DB_Files", header: "DB.h".}
+
+when isMainModule:
+    echo "hi"
