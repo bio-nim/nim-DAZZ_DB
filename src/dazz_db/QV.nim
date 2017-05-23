@@ -1,5 +1,3 @@
-{.compile: "../../repos/DAZZ_DB/QV.c".}
-{.passC: "-I../../repos/DAZZ_DB".}
 ## ******************************************************************************************
 ## 
 ##   Compressor/decompressor for .quiv files: customized Huffman codes for each stream based on

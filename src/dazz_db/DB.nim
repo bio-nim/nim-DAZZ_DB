@@ -1,5 +1,3 @@
-{.compile: "../../repos/DAZZ_DB/DB.c".}
-{.passC: "-I../../repos/DAZZ_DB".}
 ## ******************************************************************************************
 ## 
 ##   Compressed data base module.  Auxiliary routines to open and manipulate a data base for
@@ -15,7 +13,6 @@
 ## ******************************************************************************************
 
 from QV import QVcoding
-
 ## ******************************************************************************************
 ## 
 ##   UTILITIES
@@ -127,7 +124,7 @@ type
 
 type
   HITS_TRACK* {.importc: "HITS_TRACK", header: "DB.h".} = object
-    next* {.importc: "next".}: ptr _track ##   Link to next track
+    next* {.importc: "next".}: ptr HITS_TRACK ##   Link to next track
     name* {.importc: "name".}: cstring ##   Symbolic name of track
     size* {.importc: "size".}: cint ##   Size in bytes of anno records
     anno* {.importc: "anno".}: pointer ##   over [0,nreads]: read i annotation: int, int64, or 'size' records
@@ -141,7 +138,7 @@ type
 
 type
   HITS_QV* {.importc: "HITS_QV", header: "DB.h".} = object
-    next* {.importc: "next".}: ptr _track
+    next* {.importc: "next".}: ptr HITS_TRACK
     name* {.importc: "name".}: cstring
     ncodes* {.importc: "ncodes".}: cint ##   # of coding tables
     coding* {.importc: "coding".}: ptr QVcoding ##   array [0..ncodes-1] of coding schemes (see QV.h)
@@ -344,6 +341,3 @@ proc Read_All_Sequences*(db: ptr HITS_DB; ascii: cint): cint {.cdecl,
 proc List_DB_Files*(path: cstring;
                    actor: proc (path: cstring; extension: cstring) {.cdecl.}): cint {.
     cdecl, importc: "List_DB_Files", header: "DB.h".}
-
-when isMainModule:
-    echo "hi"
