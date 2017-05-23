@@ -1,0 +1,5 @@
+nimcache/
+*.bps
+*.idx
+*.db
+*.exe

@@ -1,3 +1,5 @@
+# vim: sw=2 ts=2 sts=2 tw=80 et:
+{.compile: "DB.c".}
 ## ******************************************************************************************
 ## 
 ##   Compressed data base module.  Auxiliary routines to open and manipulate a data base for
