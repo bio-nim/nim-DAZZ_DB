@@ -12,7 +12,7 @@
 ## 
 ## ******************************************************************************************
 
-from QV import QVcoding
+from qv import QVcoding
 ## ******************************************************************************************
 ## 
 ##   UTILITIES
@@ -214,7 +214,7 @@ const
 ##     -1: The DB could not be opened for a reason reported by the routine to EPLACE
 ##      0: Open of DB proceeded without mishap
 ##      1: Open of DAM proceeded without mishap
-
+# Note: path must be a writable string!
 proc Open_DB*(path: cstring; db: ptr HITS_DB): cint {.cdecl, importc: "Open_DB",
     header: "DB.h".}
 ##  Trim the DB or part thereof and all loaded tracks according to the cutoff and all settings
