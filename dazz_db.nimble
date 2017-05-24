@@ -11,7 +11,7 @@ requires "nim >= 0.17.0"
 
 srcDir = "./src"
 
-if not dirExists("repos/DAZZ_DB"):
+if not fileExists("repos/DAZZ_DB/DB.h"):
     let msg = "git submodule update --init"
     echo msg
     exec(msg)
