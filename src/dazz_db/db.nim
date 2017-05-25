@@ -39,22 +39,27 @@ proc Fopen*(path: cstring; mode: cstring): ptr FILE {.cdecl, importc: "Fopen",
     header: "DB.h".}
 ##  Open file path for "mode"
 
-proc PathTo*(path: cstring): cstring {.cdecl, importc: "PathTo", header: "DB.h".}
+proc pPathTo(path: cstring): cstring {.cdecl, importc: "PathTo", header: "DB.h".}
 ##  Return path portion of file name "path"
+proc PathTo*(path: string): string =
+  return $pPathTo(path.cstring)
 
-proc Root*(path: cstring; suffix: cstring): cstring {.cdecl, importc: "Root",
-    header: "DB.h".}
+proc pRoot(path: cstring; suffix: cstring): cstring {.cdecl, importc: "Root", header: "DB.h".}
 ##  Return the root name, excluding suffix, of "path"
 ##  Catenate returns concatenation of path.sep.root.suffix in a *temporary* buffer
 ##  Numbered_Suffix returns concatenation of left.<num>.right in a *temporary* buffer
+proc Root*(path: string; suffix: string): string =
+  return $pRoot(path.cstring, suffix.cstring)
 
-proc Catenate*(path: cstring; sep: cstring; root: cstring; suffix: cstring): cstring {.
-    cdecl, importc: "Catenate", header: "DB.h".}
+proc pCatenate(path: cstring; sep: cstring; root: cstring; suffix: cstring): cstring {.  cdecl, importc: "Catenate", header: "DB.h".}
+proc Catenate*(path: string; sep: string; root: string; suffix: string): string =
+  return $pCatenate(path.cstring, sep.cstring, root.cstring, suffix.cstring)
+
 proc Numbered_Suffix*(left: cstring; num: cint; right: cstring): cstring {.cdecl,
     importc: "Numbered_Suffix", header: "DB.h".}
 ##  DB-related utilities
 
-proc Print_Number*(num: int64; width: cint; `out`: ptr FILE) {.cdecl,
+proc Print_Number*(num: int64; width: cint; `out`: FILE) {.cdecl,
     importc: "Print_Number", header: "DB.h".}
 ##   Print readable big integer
 
@@ -276,7 +281,7 @@ proc Close_Track*(db: ptr HITS_DB; track: cstring) {.cdecl, importc: "Close_Trac
 ##  are needed by the alignment algorithms.  If cannot allocate memory then return NULL
 ##  if INTERACTIVE is defined, or print error to stderr and exit otherwise.
 
-proc New_Read_Buffer*(db: ptr HITS_DB): cstring {.cdecl, importc: "New_Read_Buffer",
+proc New_Read_Buffer*(db: ptr HITS_DB): ptr char {.cdecl, importc: "New_Read_Buffer",
     header: "DB.h".}
 ##  Load into 'read' the i'th read in 'db'.  As a lower case ascii string if ascii is 1, an
 ##    upper case ascii string if ascii is 2, and a numeric string over 0(A), 1(C), 2(G), and 3(T)
@@ -285,7 +290,7 @@ proc New_Read_Buffer*(db: ptr HITS_DB): cstring {.cdecl, importc: "New_Read_Buff
 ##    and INTERACTIVE is defined.
 
 proc Load_Read*(db: ptr HITS_DB; i: cint; read: cstring; ascii: cint): cint {.cdecl,
-    importc: "Load_Read", header: "DB.h".}
+    importc: "Load_Read", header: "DB.h", discardable.}
 ##  Exactly the same as Load_Read, save the arrow information is loaded, not the DNA sequence,
 ##    and there is only a choice between numeric (0) or ascii (1);
 
@@ -299,7 +304,7 @@ proc Load_Arrow*(db: ptr HITS_DB; i: cint; read: cstring; ascii: cint): cint {.c
 ##    A NULL pointer is returned if an error occured and INTERACTIVE is defined.
 
 proc Load_Subread*(db: ptr HITS_DB; i: cint; beg: cint; `end`: cint; read: cstring;
-                  ascii: cint): cstring {.cdecl, importc: "Load_Subread",
+                  ascii: cint): ptr char {.cdecl, importc: "Load_Subread",
                                        header: "DB.h".}
 ##  Allocate a set of 5 vectors large enough to hold the longest QV stream that will occur
 ##    in the database.  If cannot allocate memory then return NULL if INTERACTIVE is defined,

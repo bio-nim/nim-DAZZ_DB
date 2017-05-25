@@ -10,6 +10,7 @@ license       = "MIT"
 requires "nim >= 0.17.0"
 
 srcDir = "./src"
+bin = @["LA4Falcon"]
 
 if not fileExists("repos/DAZZ_DB/DB.h"):
     let msg = "git submodule update --init"

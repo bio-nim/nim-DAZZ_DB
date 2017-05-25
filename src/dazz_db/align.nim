@@ -124,14 +124,14 @@ type
 ## *
 
 const
-  COMP_FLAG* = 0x00000001
-  ACOMP_FLAG* = 0x00000002
+  COMP_FLAG* = 0x00000001'u32
+  ACOMP_FLAG* = 0x00000002'u32
 
-template COMP*(x: untyped): untyped =
-  ((x) and COMP_FLAG)
+proc COMP*(x: uint32): bool =
+  bool(x and COMP_FLAG)
 
-template ACOMP*(x: untyped): untyped =
-  ((x) and ACOMP_FLAG)
+proc ACOMP*(x: uint32): bool =
+  bool(x and ACOMP_FLAG)
 
 const
   START_FLAG* = 0x00000004
@@ -271,7 +271,7 @@ proc Compute_Trace_ALL*(align: ptr Alignment; work: ptr Work_Data): cint {.cdecl
     importc: "Compute_Trace_ALL", header: "align.h".}
 proc Compute_Trace_PTS*(align: ptr Alignment; work: ptr Work_Data; trace_spacing: cint;
                        mode: cint): cint {.cdecl, importc: "Compute_Trace_PTS",
-                                        header: "align.h".}
+                                        header: "align.h", discardable.}
 proc Compute_Trace_MID*(align: ptr Alignment; work: ptr Work_Data; trace_spacing: cint;
                        mode: cint): cint {.cdecl, importc: "Compute_Trace_MID",
                                         header: "align.h".}
@@ -310,14 +310,14 @@ proc Compute_Trace_IRR*(align: ptr Alignment; work: ptr Work_Data; mode: cint): 
 ##      is also appropriately inverted.
 ## 
 
-proc Alignment_Cartoon*(file: ptr FILE; align: ptr Alignment; indent: cint; coord: cint) {.
+proc Alignment_Cartoon*(file: FILE; align: ptr Alignment; indent: cint; coord: cint) {.
     cdecl, importc: "Alignment_Cartoon", header: "align.h".}
-proc Print_Alignment*(file: ptr FILE; align: ptr Alignment; work: ptr Work_Data;
+proc Print_Alignment*(file: FILE; align: ptr Alignment; work: ptr Work_Data;
                      indent: cint; width: cint; border: cint; upper: cint; coord: cint): cint {.
-    cdecl, importc: "Print_Alignment", header: "align.h".}
-proc Print_Reference*(file: ptr FILE; align: ptr Alignment; work: ptr Work_Data;
+    cdecl, importc: "Print_Alignment", header: "align.h", discardable.}
+proc Print_Reference*(file: FILE; align: ptr Alignment; work: ptr Work_Data;
                      indent: cint; `block`: cint; border: cint; upper: cint; coord: cint): cint {.
-    cdecl, importc: "Print_Reference", header: "align.h".}
+    cdecl, importc: "Print_Reference", header: "align.h", discardable.}
 proc Flip_Alignment*(align: ptr Alignment; full: cint) {.cdecl,
     importc: "Flip_Alignment", header: "align.h".}
 ## ** OVERLAP ABSTRACTION:
@@ -360,13 +360,13 @@ type
 ##      is non-zero.  The 'ovl' came from the file names 'fname'.
 ## 
 
-proc Read_Overlap*(input: ptr FILE; ovl: ptr Overlap): cint {.cdecl,
-    importc: "Read_Overlap", header: "align.h".}
-proc Read_Trace*(innput: ptr FILE; ovl: ptr Overlap; tbytes: cint): cint {.cdecl,
-    importc: "Read_Trace", header: "align.h".}
-proc Write_Overlap*(output: ptr FILE; ovl: ptr Overlap; tbytes: cint) {.cdecl,
+proc Read_Overlap*(input: FILE; ovl: ptr Overlap): cint {.cdecl,
+    importc: "Read_Overlap", header: "align.h", discardable.}
+proc Read_Trace*(innput: FILE; ovl: ptr Overlap; tbytes: cint): cint {.cdecl,
+    importc: "Read_Trace", header: "align.h", discardable.}
+proc Write_Overlap*(output: FILE; ovl: ptr Overlap; tbytes: cint) {.cdecl,
     importc: "Write_Overlap", header: "align.h".}
-proc Print_Overlap*(output: ptr FILE; ovl: ptr Overlap; tbytes: cint; indent: cint) {.
+proc Print_Overlap*(output: FILE; ovl: ptr Overlap; tbytes: cint; indent: cint) {.
     cdecl, importc: "Print_Overlap", header: "align.h".}
 proc Compress_TraceTo8*(ovl: ptr Overlap) {.cdecl, importc: "Compress_TraceTo8",
                                         header: "align.h".}
