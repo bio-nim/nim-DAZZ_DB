@@ -2,7 +2,7 @@ VPATH=../repos/DAZZ_DB
 PATH:=../repos/DAZZ_DB:${PATH}
 export PATH
 
-default: test-open
+default: #test-open
 test-open: DBrm
 	nim c -r -o:open.exe open
 DBrm:
