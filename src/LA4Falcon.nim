@@ -9,7 +9,9 @@
 ## 
 ##   Based on the original LAshow.c, this code is modified by Jason Chin to support generating
 ##     consensus sequences from daligner output
-
+#import parseopt as popt
+from parseopt as popt import nil
+from strutils import `%`
 from os import nil
 import
   dazz_db/DB, dazz_db/DBX, dazz_db/align, dazz_db/license_myers,
@@ -104,7 +106,7 @@ proc qsort(p: pointer, nel, width: csize, compar: qsort_cmp) {.cdecl, importc, h
 proc print_hits*(hit_count: cint; dbx2: ptr HITS_DBX; bbuffer: ptr char,
                 print_scratch: var string; MAX_HIT_COUNT: cint) =
   var tmp_idx: cint
-  let bsize = len(print_scratch)
+  let bsize = 1 shl 17 #capacity(print_scratch)
   qsort(ovlgrps, (hit_count + 1), sizeof((OverlapGroup)), compare_ovlgrps)
   tmp_idx = 0
   while tmp_idx < (hit_count + 1) and tmp_idx < MAX_HIT_COUNT:
@@ -139,7 +141,42 @@ proc ORDER*(left: pointer; rite: pointer): cint {.cdecl.} =
 proc SYSTEM_ERROR() =
   os.raiseOSError(os.osLastError(), "Exiting")
 
-proc main*(): cint =
+let Prog_Name: string = os.paramStr(0)
+
+proc exitHelp() =
+  var msg = """$# $# $#
+where
+-i=<Indent>
+-w=<Alignment width>
+-b=<Alignment border>
+-H=<seed threshold (in bp)>
+-n=<max numer of supporting read ouput (used for FALCON consensus. default 400, max: 2000)>
+
+-h   help
+-U   uppercase
+-a   align
+-r   reference
+-c   cartoon
+-F   flip
+-M   map
+-f   falcon
+-s   skip
+-g   group
+-P   preload ##  Preload DB reads, if possible.
+"""
+  msg = msg % [Prog_Name, Usage[0], Usage[1]]
+  stderr.write(msg)
+  system.quit(system.QuitSuccess)
+proc ARG_POSITIVE(flag: string, val: string): int =
+  echo "flag:", flag, ", val:", repr(val)
+  doAssert(len(flag) == 1)
+  result = strutils.parseInt(val)
+  doAssert(result > 0, "-$#=$# integer must be positive" % [flag, val])
+proc ARG_NON_NEGATIVE(flag: string, val: string): int =
+  doAssert(len(flag) == 1)
+  result = strutils.parseInt(val)
+  doAssert(result >= 0, "-$#=$# integer cannot be negative" % [flag, val])
+proc main*(): int =
   var
     dbx1: HITS_DBX
   var
@@ -182,7 +219,7 @@ proc main*(): cint =
   var
     SEED_MIN: cint
     MAX_HIT_COUNT: cint
-    SKIP: cint
+    SKIP: bool
   var PRELOAD: bool
   ##   Process options
   var
@@ -198,67 +235,64 @@ proc main*(): cint =
   FALCON = false
   M4OVL = false
   SEED_MIN = 8000
-  SKIP = 0
+  SKIP = false
   ALIGN = false
   REFERENCE = false
   CARTOON = false
   FLIP = false
   MAX_HIT_COUNT = 400
-#[
-  j = 1
-  i = 1
-  while i < argc:
-    if argv[i][0] == '-':
-      case argv[i][1]
-      of 'i':
-        ARG_NON_NEGATIVE(INDENT, "Indent")
-      of 'w':
-        ARG_POSITIVE(WIDTH, "Alignment width")
-      of 'b':
-        ARG_NON_NEGATIVE(BORDER, "Alignment border")
-      of 'H':
-        ARG_POSITIVE(SEED_MIN, "seed threshold (in bp)")
-      of 'n':
-        ARG_POSITIVE(MAX_HIT_COUNT, "max numer of supporting read ouput (used for FALCON consensus. default 400, max: 2000)")
+  var argv = @[os.paramStr(0)]
+  # os.getAppFilename() to resolve
+
+  discard popt.initOptParser()
+  for kind, key, val in popt.getopt():
+    case kind
+    of popt.cmdArgument:
+      argv.add(key)
+    of popt.cmdLongOption:
+      case key
+      of "help": exitHelp()
+      #of "version": writeVersion()
+    of popt.cmdShortOption:
+      case key
+      of "h": exitHelp()
+      of "i": INDENT = ARG_NON_NEGATIVE(key, val).cint
+      of "w": WIDTH = ARG_POSITIVE(key, val).cint
+      of "b": BORDER = ARG_NON_NEGATIVE(key, val).cint
+      of "H": SEED_MIN = ARG_POSITIVE(key, val).cint
+      of "n":
+        MAX_HIT_COUNT = ARG_POSITIVE(key, val).cint
         if MAX_HIT_COUNT > 2000: MAX_HIT_COUNT = 2000
+      of "U": UPPERCASE = 1
+      of "a": ALIGN = true
+      of "r": REFERENCE = true
+      of "c": CARTOON = true
+      of "F": FLIP = true
+      of "M": MAP = true
+      of "o": OVERLAP = true
+      of "m": M4OVL = true
+      of "f": FALCON = true
+      of "s": SKIP = true
+      of "g": GROUP = true
+      of "P": PRELOAD = true
       else:
-        ARG_FLAGS("smfocargUFMP")
-    else:
-      argv[inc(j)] = argv[i]
-    inc(i)
-  argc = j
-  UPPERCASE = flags['U']
-  ALIGN = flags['a']
-  REFERENCE = flags['r']
-  CARTOON = flags['c']
-  FLIP = flags['F']
-  MAP = flags['M']
-  OVERLAP = flags['o']
-  M4OVL = flags['m']
-  FALCON = flags['f']
-  SKIP = flags['s']
-  GROUP = flags['g']
-  PRELOAD = flags['P']
-  ##  Preload DB reads, if possible.
-  if argc <= 2:
-    fprintf(stderr, "Usage: %s %s\x0A", Prog_Name, Usage[0])
-    fprintf(stderr, "       %*s %s\x0A", cast[cint](strlen(Prog_Name)), "", Usage[1])
-    exit(1)
-]#
-  var argc = os.paramCount()
-  var argv = os.commandLineParams()
-  var Prog_Name: cstring = argv[1]
+        echo "NADA!"
+    of popt.cmdEnd: assert(false) # cannot happen
+  echo "f=", FALCON, " P=", PRELOAD, ", o=", OVERLAP
+  echo "ARGV:", repr(argv)
+  let argc = len(argv)
+  doAssert(argc > 2, "We need at least 2 args after prog-name and flags.")
   var dbname = argv[1]
   ##   Open trimmed DB or DB pair
   var
     pwd: string
     root: string
-  ISTWO = 0
+  ISTWO = 0.cint
   Open_DBX(dbname, addr dbx1, PRELOAD)
   if db1.part > 0:
     fprintf(stderr, "%s: Cannot be called on a block: %s\x0A", Prog_Name, dbname.cstring)
     system.quit(system.QuitFailure)
-  if os.paramCount() > 3:
+  if argc > 3:
     pwd = PathTo(argv[3])
     root = Root(argv[3], ".las")
     input = fopen(Catenate(pwd, "/", root, ".las").cstring, "r")
@@ -651,13 +685,13 @@ proc main*(): cint =
             printf("%d,", int16(trace[u]))
             inc(u)
         ]#
-        if SKIP == 1:
-          ## if SKIP = 0, then skip_rest is always 0
+        if SKIP:
           if (int64(aln.alen) < int64(aln.blen)) and
               (int64(ovl.path.abpos) < 1) and
               (int64(aln.alen) - int64(ovl.path.aepos) < 1):
             printf("* *\x0A")
             skip_rest = 1
+        ## if not SKIP, then skip_rest is always 0
     if ALIGN or CARTOON or REFERENCE:
       if ALIGN or REFERENCE:
         var
@@ -736,3 +770,6 @@ proc main*(): cint =
   Close_DBX(addr dbx1)
   if ISTWO != 0: Close_DBX(addr dbx2)
   system.quit(system.QuitSuccess)
+
+if isMainModule:
+  system.programResult = main()
