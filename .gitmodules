@@ -2,3 +2,4 @@
 	path = repos/DAZZ_DB
 	url = git://github.com/bio-nim/DAZZ_DB
 	ignore = dirty
+	branch = develop
