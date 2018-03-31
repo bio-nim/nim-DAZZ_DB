@@ -5,7 +5,7 @@ from dazz_db/dazz import nil
 
 proc main() =
   #discard db.Malloc(1024, "Allocated?")
-  var db1: db.HITS_DB
+  var db1: db.DAZZ_DB
   let name = "foo"
   discard db.Open_DB(name, addr db1) # can over-write name
   echo "Opened ", name
