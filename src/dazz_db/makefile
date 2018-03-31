@@ -1,5 +1,5 @@
 default:
-	nim c --debuginfo -r dazz_db.nim
+	nim c --debuginfo -r dazz.nim
 QV.nim:
 	c2nim --header --cdecl --out:$@ ../../repos/DAZZ_DB/QV.h
 DB.nim:
